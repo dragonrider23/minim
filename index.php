@@ -4,8 +4,8 @@ $sitename = 'SomeWebsite';
 $http404page = './page/404.md';
 $parsedHtmlPath = './parsed';
 $defaultPageType = 'md'; // md, html, txt
-$cachePages = true;
-$debug = false;
+$cachePages = false;
+$debug = true;
 
 // Don't edit below here
 //
@@ -48,12 +48,12 @@ function getpage($page)
   preg_match("/^TYPE:\s*(.*)/m", $pageheader, $typeMatch);          // type of document, HTML, markdown, text, etc.
 
   $metadata = [
-    'title' => isset($titleMatch[1]) ? $titleMatch[1] : '',
-    'author' => isset($authorMatch[1]) ? $authorMatch[1] : '',
-    'date' => isset($dateMatch[1]) ? $dateMatch[1] : '',
-    'menu' => isset($menuMatch[1]) ? $menuMatch[1] : '0',
-    'url' => isset($urlMatch[1]) ? $urlMatch[1] : '',
-    'type' => isset($typeMatch[1]) ? strtolower($typeMatch[1]) : $defaultPageType
+    'title' => isset($titleMatch[1]) ? trim($titleMatch[1]) : '',
+    'author' => isset($authorMatch[1]) ? trim($authorMatch[1]) : '',
+    'date' => isset($dateMatch[1]) ? trim($dateMatch[1]) : '',
+    'menu' => isset($menuMatch[1]) ? trim($menuMatch[1]) : '0',
+    'url' => isset($urlMatch[1]) ? trim($urlMatch[1]) : '',
+    'type' => isset($typeMatch[1]) ? strtolower(trim($typeMatch[1])) : $defaultPageType
   ];
   $metadata['url'] = $metadata['url'] ?: str_replace(' ', '-', strtolower($metadata['title']));
 
