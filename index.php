@@ -1,4 +1,5 @@
 <?php
+// User settings
 $sitename = 'SomeWebsite';
 $http404page = './page/404.md';
 $parsedHtmlPath = './parsed';
@@ -6,6 +7,8 @@ $defaultPageType = 'md'; // md, html, txt
 $cachePages = true;
 $debug = false;
 
+// Don't edit below here
+//
 if ($debug) {
   ini_set('display_errors', true);
   ini_set('display_startup_errors', true);
@@ -52,7 +55,7 @@ function getpage($page)
     'url' => isset($urlMatch[1]) ? $urlMatch[1] : '',
     'type' => isset($typeMatch[1]) ? strtolower($typeMatch[1]) : $defaultPageType
   ];
-  $metadata['url'] = $metadata['url'] ?: strtolower($metadata['title']);
+  $metadata['url'] = $metadata['url'] ?: str_replace(' ', '-', strtolower($metadata['title']));
 
   return array($pageheader, $pagecontent, $metadata);
 }
@@ -60,6 +63,11 @@ function getpage($page)
 // Display a cached version if possible
 function displayCached($basepath, $type, $page)
 {
+  global $cachePages;
+  if (!$cachePages) {
+    return;
+  }
+
   if (file_exists($basepath.'/'.$type.'-'.$page.'.html')) {
     $file = file_get_contents($basepath.'/'.$type.'-'.$page.'.html');
     $hash = explode("\n", $file, 3);
