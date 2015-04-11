@@ -1,6 +1,8 @@
+---
 TITLE:A new article
 DATE:2015 April 10th
 AUTHOR:Jo
+---
 
 This is a sample blog article. What to do now?
 * write a new article,
