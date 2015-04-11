@@ -146,7 +146,7 @@ function renderMenu()
   foreach($pages as $page)
   {
     list($menupageheader, $menupagecontent, $menupagemeta) = getpage($page);
-    if ($menupagemeta['menu'] && $menupagemeta['url']) {
+    if ($menupagemeta['menu'] && $menupagemeta['url'] && $menupagemeta['title']) {
       $menu .= '<li><a href="'.$menupagemeta['url'].'">'.$menupagemeta['title']."</a></li>\n";
     }
   }
