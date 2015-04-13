@@ -4,8 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= $pagemeta['title'] ? $sitename.' - '.$pagemeta['title'] : $sitename ?></title>
-  <base href="<?= rtrim(dirname(parse_url($_SERVER['PHP_SELF'], PHP_URL_PATH)), '/') . '/' ?>">
+  <title><?= $title ?></title>
+  <base href="<?= $basepath ?>">
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
@@ -24,7 +24,7 @@ if ($type === "article") {
 } else {
   echo '<div class="page">';
 }
-echo renderContent($pagemeta['type'], $pagecontent);
+echo renderContent($pagemeta['type'], $content);
 echo '</div>';
 ?>
 

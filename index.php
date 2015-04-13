@@ -1,11 +1,12 @@
 <?php
 // User settings
-$sitename = 'SomeWebsite';
-$http404page = './page/404.md';
-$parsedHtmlPath = './parsed';
-$defaultPageType = 'md'; // md, html, txt
-$cachePages = true;
-$debug = false;
+$sitename = 'SomeWebsite';              // Name of site dispayed on every page
+$http404page = './page/404.md';         // Page to display when a 404 error is encountered
+$parsedHtmlPath = './parsed';           // Location of HTML cache
+$useMarkdown = true;                    // Use the Markdown parser?
+$defaultPageType = 'md';                // Type to assign page if one isn't given, md, html, txt
+$cachePages = true;                     // Cache generated HTML
+$debug = false;                          // Enabled debug mode, set to false in production
 
 // Don't edit below here
 //
@@ -16,7 +17,9 @@ if ($debug) {
   error_reporting(0);
 }
 
-require 'vendor/autoload.php';
+if ($useMarkdown) {
+  require 'vendor/autoload.php';
+}
 
 // Parse file and get metadata
 function getpage($page)
@@ -69,24 +72,53 @@ function displayCached($basepath, $type, $page)
   }
 
   if (file_exists($basepath.'/'.$type.'-'.$page.'.html')) {
+    // Cache structure, Line 1: Source path, 2: Source hash, 3: Menu hashes, 4: HTML Content
     $file = file_get_contents($basepath.'/'.$type.'-'.$page.'.html');
-    $hash = explode("\n", $file, 3);
+    $hash = explode("\n", $file, 4);
     $currentHash = md5_file($hash[0]);
 
-    if ($currentHash == $hash[1]) {
-      debugHeader('Page was in cache');
-      echo $hash[2];
-      exit();
+    // If the source doesn't match its current form, bad cache
+    if ($currentHash != $hash[1]) {
+      return false;
     }
+
+    // Check valid menu
+    $menu = explode(':', $hash[2]);
+    $menuItems = 0;
+
+    $pages = glob("./page/*.*");
+    foreach($pages as $page)
+    {
+      list(, , $menupagemeta) = getpage($page);
+      if ($menupagemeta['menu'] && $menupagemeta['url'] && $menupagemeta['title']) {
+        $menuItems++;
+        if (!in_array(md5_file($page), $menu)) {
+          return false;
+        }
+      }
+    }
+
+    if ($menuItems != count($menu)) {
+      return false;
+    }
+
+    debugHeader('Page was in cache');
+    echo $hash[3];
+    exit();
   }
 }
 
 function renderContent($type, $content)
 {
+  global $useMarkdown;
   switch ($type) {
     case 'md': // Markdown
-      $md = (new Parsedown())->text($content);
-      return parseTags($md);
+      if ($useMarkdown) {
+        $md = (new Parsedown())->text($content);
+        return parseTags($md);
+      } else {
+        return $content;
+      }
       break;
 
     case 'txt': // Fall through
@@ -143,6 +175,7 @@ function renderMenu()
 {
   $pages = glob("./page/*.*");
   $menu = '';
+
   foreach($pages as $page)
   {
     list($menupageheader, $menupagecontent, $menupagemeta) = getpage($page);
@@ -150,7 +183,24 @@ function renderMenu()
       $menu .= '<li><a href="'.$menupagemeta['url'].'">'.$menupagemeta['title']."</a></li>\n";
     }
   }
+
   return $menu;
+}
+
+function menuHashes()
+{
+  $pages = glob("./page/*.*");
+  $menuHashes = [];
+
+  foreach($pages as $page)
+  {
+    list($menupageheader, $menupagecontent, $menupagemeta) = getpage($page);
+    if ($menupagemeta['menu'] && $menupagemeta['url'] && $menupagemeta['title']) {
+      array_push($menuHashes, md5_file($page));
+    }
+  }
+
+  return implode(':', $menuHashes);
 }
 
 function debugHeader($value, $num = null)
@@ -161,39 +211,58 @@ function debugHeader($value, $num = null)
   }
 }
 
-// Get page requested
-$requestedpage = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-$urlChunks = parse_url($_SERVER['PHP_SELF'], PHP_URL_PATH);
-$parentDir = dirname($urlChunks);
-$pageName = trim($parentDir, '/');
-if ($pageName === $requestedpage) {
-  $requestedpage = 'index';     // check if page is home, there should be a better way to do it!
-}
-$type = strpos($_SERVER['REQUEST_URI'], 'article') ? 'article' : 'page';
+function getRequestedPage() {
+  $requestedpage = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+  $urlChunks = parse_url($_SERVER['PHP_SELF'], PHP_URL_PATH);
+  $parentDir = dirname($urlChunks);
+  $pageName = trim($parentDir, '/');
+  if ($pageName === $requestedpage) {
+    $requestedpage = 'index';     // check if page is home, there should be a better way to do it!
+  }
+  $type = strpos($_SERVER['REQUEST_URI'], 'article') ? 'article' : 'page';
+  $pages = glob("./".$type."/*$requestedpage.*");
 
+  if ($pages) {
+    $pagefilename = $pages[0];
+  } else {
+    $pagefilename = $http404page;
+    $type = 'page';
+  }
+
+  return [$type, $requestedpage, $pagefilename];
+}
+
+function generatePage($vars) {
+  extract($vars);
+  ob_start();
+  include 'template.php';
+  debugHeader('Page was generated');
+  return ob_get_clean();
+}
+
+function saveCache($pagefilename, $parsedHtml, $parsedHtmlPath, $type, $requestedpage) {
+  $file = $pagefilename ."\n". md5_file($pagefilename) ."\n". menuHashes() ."\n". $parsedHtml;
+  file_put_contents($parsedHtmlPath.'/'.$type.'-'.$requestedpage.'.html', $file);
+}
+
+list($type, $requestedpage, $pagefilename) = getRequestedPage();
 displayCached($parsedHtmlPath, $type, $requestedpage); // Will exit if cached version is available
-
-$pages = glob("./".$type."/*$requestedpage.*");
-
-if ($pages) {
-  $pagefilename = $pages[0];
-} else {
-  $pagefilename = $http404page;
-  $type = 'page';
-}
 
 list($pageheader, $pagecontent, $pagemeta) = getpage($pagefilename);
 
-// Generate page/article
-debugHeader('Page was generated');
-ob_start();
-include 'template.php';
-$parsedHtml = ob_get_clean();
+$parsedHtml = generatePage([
+  'sitename' => $sitename,
+  'type' => $type,
+  'title' => $pagemeta['title'] ? $sitename.' - '.$pagemeta['title'] : $sitename,
+  'pagemeta' => $pagemeta,
+  'content' => $pagecontent,
+  'basepath' => rtrim(dirname(parse_url($_SERVER['PHP_SELF'], PHP_URL_PATH)), '/') . '/'
+]);
 
 // Save a cached version of the page
 if ($cachePages) {
-  $file = $pagefilename ."\n". md5_file($pagefilename) ."\n". $parsedHtml;
-  file_put_contents($parsedHtmlPath.'/'.$type.'-'.$requestedpage.'.html', $file);
+  saveCache($pagefilename, $parsedHtml, $parsedHtmlPath, $type, $requestedpage);
 }
+
 // Display
 echo $parsedHtml;
