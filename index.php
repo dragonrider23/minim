@@ -72,9 +72,9 @@ function displayCached($basepath, $type, $page)
   }
 
   if (file_exists($basepath.'/'.$type.'-'.$page.'.html')) {
-    // Cache structure, Line 1: Source path, 2: Source hash, 3: Menu hashes, 4: HTML Content
+    // Cache structure, Line 1: Source path, 2: Source hash, 3: HTML Content
     $file = file_get_contents($basepath.'/'.$type.'-'.$page.'.html');
-    $hash = explode("\n", $file, 4);
+    $hash = explode("\n", $file, 3);
     $currentHash = md5_file($hash[0]);
 
     // If the source doesn't match its current form, bad cache
@@ -83,7 +83,7 @@ function displayCached($basepath, $type, $page)
     }
 
     // Check valid menu
-    $menu = explode(':', $hash[2]);
+    $menu = file($basepath.'/menu.conf', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     $menuItems = 0;
 
     $pages = glob("./page/*.*");
@@ -93,17 +93,19 @@ function displayCached($basepath, $type, $page)
       if ($menupagemeta['menu'] && $menupagemeta['url'] && $menupagemeta['title']) {
         $menuItems++;
         if (!in_array(md5_file($page), $menu)) {
+          array_map('unlink', glob($basepath.'/*')); // Delete cache, menu has changed
           return false;
         }
       }
     }
 
     if ($menuItems != count($menu)) {
+      array_map('unlink', glob($basepath.'/*')); // Delete cache, menu has changed
       return false;
     }
 
     debugHeader('Page was in cache');
-    echo $hash[3];
+    echo $hash[2];
     exit();
   }
 }
@@ -200,7 +202,7 @@ function menuHashes()
     }
   }
 
-  return implode(':', $menuHashes);
+  return implode("\n", $menuHashes);
 }
 
 function debugHeader($value, $num = null)
@@ -241,8 +243,9 @@ function generatePage($vars) {
 }
 
 function saveCache($pagefilename, $parsedHtml, $parsedHtmlPath, $type, $requestedpage) {
-  $file = $pagefilename ."\n". md5_file($pagefilename) ."\n". menuHashes() ."\n". $parsedHtml;
+  $file = $pagefilename ."\n". md5_file($pagefilename) ."\n". $parsedHtml;
   file_put_contents($parsedHtmlPath.'/'.$type.'-'.$requestedpage.'.html', $file);
+  file_put_contents($parsedHtmlPath.'/menu.conf', menuHashes());
 }
 
 list($type, $requestedpage, $pagefilename) = getRequestedPage();
