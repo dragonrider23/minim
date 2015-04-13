@@ -4,8 +4,8 @@ $sitename = 'SomeWebsite';
 $http404page = './page/404.md';
 $parsedHtmlPath = './parsed';
 $defaultPageType = 'md'; // md, html, txt
-$cachePages = false;
-$debug = true;
+$cachePages = true;
+$debug = false;
 
 // Don't edit below here
 //
