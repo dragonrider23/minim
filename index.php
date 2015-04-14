@@ -1,12 +1,13 @@
 <?php
 // User settings
 $sitename = 'SomeWebsite';              // Name of site dispayed on every page
-$http404page = './page/404.md';         // Page to display when a 404 error is encountered
-$parsedHtmlPath = './parsed';           // Location of HTML cache
+$siteurl = 'http://localhost/minim';    // URL for the Minim site
+$http404page = 'page/404.md';           // Page to display when a 404 error is encountered
+$parsedHtmlPath = 'parsed';             // Location of HTML cache
 $useMarkdown = true;                    // Use the Markdown parser?
 $defaultPageType = 'md';                // Type to assign page if one isn't given, md, html, txt
 $cachePages = true;                     // Cache generated HTML
-$debug = false;                          // Enabled debug mode, set to false in production
+$debug = false;                         // Enabled debug mode, set to false in production
 
 // Don't edit below here
 //
@@ -15,6 +16,11 @@ if ($debug) {
   ini_set('display_startup_errors', true);
 } else {
   error_reporting(0);
+}
+
+// Set to true if running from cli.php
+if (!defined('CLI')) {
+  define('CLI', false);
 }
 
 if ($useMarkdown) {
@@ -134,7 +140,8 @@ function renderContent($type, $content)
   }
 }
 
-function parseTags($content) {
+function parseTags($content)
+{
   if (strpos($content, '{{article list}}')) {
     $articleList = '';
 
@@ -213,7 +220,10 @@ function debugHeader($value, $num = null)
   }
 }
 
-function getRequestedPage() {
+function getRequestedPage()
+{
+  global $http404page;
+
   $requestedpage = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
   $urlChunks = parse_url($_SERVER['PHP_SELF'], PHP_URL_PATH);
   $parentDir = dirname($urlChunks);
@@ -234,7 +244,8 @@ function getRequestedPage() {
   return [$type, $requestedpage, $pagefilename];
 }
 
-function generatePage($vars) {
+function generatePage($vars)
+{
   extract($vars);
   ob_start();
   include 'template.php';
@@ -242,30 +253,34 @@ function generatePage($vars) {
   return ob_get_clean();
 }
 
-function saveCache($pagefilename, $parsedHtml, $parsedHtmlPath, $type, $requestedpage) {
+function saveCache($pagefilename, $parsedHtml, $parsedHtmlPath, $type, $requestedpage)
+{
   $file = $pagefilename ."\n". md5_file($pagefilename) ."\n". $parsedHtml;
   file_put_contents($parsedHtmlPath.'/'.$type.'-'.$requestedpage.'.html', $file);
   file_put_contents($parsedHtmlPath.'/menu.conf', menuHashes());
 }
 
-list($type, $requestedpage, $pagefilename) = getRequestedPage();
-displayCached($parsedHtmlPath, $type, $requestedpage); // Will exit if cached version is available
+if (!CLI) {
+  $parsedHtmlPath = rtrim($parsedHtmlPath, '/');
+  list($type, $requestedpage, $pagefilename) = getRequestedPage();
+  displayCached($parsedHtmlPath, $type, $requestedpage); // Will exit if cached version is available
 
-list($pageheader, $pagecontent, $pagemeta) = getpage($pagefilename);
+  list($pageheader, $pagecontent, $pagemeta) = getpage($pagefilename);
 
-$parsedHtml = generatePage([
-  'sitename' => $sitename,
-  'type' => $type,
-  'title' => $pagemeta['title'] ? $sitename.' - '.$pagemeta['title'] : $sitename,
-  'pagemeta' => $pagemeta,
-  'content' => $pagecontent,
-  'basepath' => rtrim(dirname(parse_url($_SERVER['PHP_SELF'], PHP_URL_PATH)), '/') . '/'
-]);
+  $parsedHtml = generatePage([
+    'sitename' => $sitename,
+    'type' => $type,
+    'title' => $pagemeta['title'] ? $sitename.' - '.$pagemeta['title'] : $sitename,
+    'pagemeta' => $pagemeta,
+    'content' => $pagecontent,
+    'basepath' => rtrim($siteurl, '/') . '/'
+  ]);
 
-// Save a cached version of the page
-if ($cachePages) {
-  saveCache($pagefilename, $parsedHtml, $parsedHtmlPath, $type, $requestedpage);
+  // Save a cached version of the page
+  if ($cachePages && $pagefilename !== $http404page) {
+    saveCache($pagefilename, $parsedHtml, $parsedHtmlPath, $type, $requestedpage);
+  }
+
+  // Display
+  echo $parsedHtml;
 }
-
-// Display
-echo $parsedHtml;
