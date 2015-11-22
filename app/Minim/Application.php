@@ -117,7 +117,8 @@ class Application
         // Port if needed
         $url .= ($_SERVER['SERVER_PORT'] == 80 || $_SERVER['SERVER_PORT'] == 443) ? '' : ':'.$_SERVER['SERVER_PORT'];
         // Directory
-        $url .= rtrim(dirname($_SERVER['PHP_SELF']), '/').'/';
+        // Windows' directory separate is \ instead of HTTP/UNIX's /, replace to make sure
+        $url .= rtrim(str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])), '/').'/';
         return $url;
     }
 }

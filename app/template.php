@@ -2,19 +2,22 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= $title ?></title>
-  <base href="<?= $basepath ?>">
-  <link rel="stylesheet" type="text/css" href="styles/style.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= $title ?></title>
+    <base href="<?= $basepath ?>">
+    <link rel="stylesheet" type="text/css" href="styles/style.css">
+    <link rel="stylesheet" type="text/css" href="styles/highlight.css">
+    <script src="js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
 </head>
 
 <body>
     <div class="header">
-      <div class="logo"><a href="."><?= $sitename ?></a></div>
-      <ul class="menu">
-        <?= $menu ?>
-      </ul>
+        <div class="logo"><a href="."><?= $sitename ?></a></div>
+        <ul class="menu">
+            <?= $menu ?>
+        </ul>
     </div>
     <div class="main">
         <?php if ($page->getType() === 'article'): ?>
@@ -26,8 +29,8 @@
         </div>
     </div>
     <div class="footer">
-      <div class="left"><a href="">&copy; <?= date("Y") ?> <?= $sitename ?></a></div>
-      <div class="right">Powered by Minim CMS</a>.</div>
+        <div class="left"><a href="">&copy; <?= date("Y") ?> <?= $sitename ?></a></div>
+        <div class="right">Powered by Minim CMS</a>.</div>
     </div>
 </body>
 </html>
