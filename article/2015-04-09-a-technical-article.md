@@ -1,7 +1,7 @@
 ---
-TITLE:A technical article
-DATE:2015 April 9th
-AUTHOR:Jo
+TITLE: A technical article
+DATE: 2015 April 9th
+AUTHOR: Jo
 ---
 
 This Python code is really good:
@@ -19,4 +19,3 @@ This one is *even better:*
         b = 256
         c = a * b
         return None
-

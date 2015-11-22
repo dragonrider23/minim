@@ -1,8 +1,8 @@
 ---
-TITLE:Blog
-MENU:1
+TITLE: Blog
+MENU: yes
 ---
 
 #Blog
 
-{{article list}}
+[article-list]

@@ -1,5 +1,19 @@
 {
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "/home/lfkeitel/git/shortcode"
+        }
+    ],
+
     "require": {
-        "erusev/parsedown": "1.5.2"
+        "erusev/parsedown": "1.5.2",
+        "onesimus-systems/shortcode": "dev-master"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "Minim\\": "app/Minim"
+        }
     }
 }

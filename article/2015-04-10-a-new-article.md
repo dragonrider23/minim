@@ -1,7 +1,7 @@
 ---
-TITLE:A new article
-DATE:2015 April 10th
-AUTHOR:Jo
+TITLE: A new article
+DATE: 2015 April 10th
+AUTHOR: Jo
 ---
 
 This is a sample blog article. What to do now?
@@ -10,4 +10,3 @@ This is a sample blog article. What to do now?
 * or do something else?
 
 ![](http://gget.it/hm8jobmp/tumblr_ltjcmgHCkz1r0mxp5.jpg)
-

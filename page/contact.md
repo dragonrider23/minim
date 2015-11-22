@@ -1,5 +1,5 @@
 ---
-TITLE:Contact
-MENU:1
-URL:mailto:contact@somewebsi.te
+TITLE: Contact
+MENU: yes
+URL: mailto:contact@somewebsi.te
 ---
