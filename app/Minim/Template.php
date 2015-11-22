@@ -15,7 +15,7 @@ class Template
         $vars = [
             'sitename' => $this->config->get('sitename'),
             'title' => $page->getMetadata('title') ? $this->config->get('sitename').' - '.$page->getMetadata('title') : $this->config->get('sitename'),
-            'basepath' => $this->config->get('siteurl'),
+            'basepath' => htmlspecialchars($this->config->get('siteurl'), ENT_QUOTES, 'UTF-8'),
             'menu' => Application::getInstance()->renderMenu(),
         ];
         extract($vars);
