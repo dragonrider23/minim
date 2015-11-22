@@ -5,4 +5,4 @@ MENU: yes
 
 #Blog
 
-[article-list]
+{{article-list}}

@@ -9,7 +9,7 @@ class Shortcode
 
     public static function init()
     {
-        self::$processor = new SC();
+        self::$processor = new SC('{{', '}}');
     }
 
     public static function register($code, callable $func)

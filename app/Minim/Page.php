@@ -19,28 +19,22 @@ class Page
 
     protected function load()
     {
-        $pagestr = file_get_contents($this->path);
-        if (substr($pagestr, 0, 3) !== '---') {
-            $this->content = '';
-            $this->metadata = [
-                'title' => '',
-                'author' => '',
-                'date' => '',
-                'menu' => '0',
-                'url' => '',
-                'type' => 'txt'
-            ];
-        }
-
-        list(, $pageheader, $pagecontent) = explode('---', $pagestr, 3);   // split into 3 parts : above the first --- (blank), metadata, content
         $this->metadata = [
             'title' => '',
             'author' => '',
             'date' => '',
             'menu' => 'no',
+            'shortcodes' => 'yes',
             'url' => '',
             'type' => self::$defaultType,
         ];
+
+        $pagestr = file_get_contents($this->path);
+        if (substr($pagestr, 0, 3) !== '---') {
+            return;
+        }
+
+        list(, $pageheader, $pagecontent) = explode('---', $pagestr, 3);   // split into 3 parts : above the first --- (blank), metadata, content
         preg_match_all("~^((?!_)[\w-]+):\s*(.*)$~m", $pageheader, $matches, PREG_SET_ORDER);
         foreach($matches as $match) {
             $this->metadata[mb_strtolower($match[1])] = trim($match[2]);
@@ -57,11 +51,14 @@ class Page
 
     public function render()
     {
-        switch ($this->metadata['type']) {
+        if ($this->metadata['shortcodes'] !== 'no') {
+            $this->parsed = Shortcode::process($this->getContent(), Application::getInstance()->getConfig(), $this);
+        }
+
+        switch (mb_strtolower($this->metadata['type'])) {
             case 'md': // Fallthrough
             case 'markdown': // Markdown
-                $this->parsed = (new \Parsedown())->text($this->content);
-                $this->parsed = Shortcode::process($this->parsed, Application::getInstance()->getConfig(), $this);
+                $this->parsed = (new \Parsedown())->text($this->getContent());
                 return $this->parsed;
 
             case 'txt': // Fallthrough
@@ -79,6 +76,9 @@ class Page
     {
         if ($key === null) {
             return $this->metadata;
+        }
+        if (!array_key_exists($key, $this->metadata)) {
+            return null;
         }
         return $this->metadata[$key];
     }
