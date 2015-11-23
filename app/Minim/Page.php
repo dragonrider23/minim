@@ -25,6 +25,7 @@ class Page
             'date' => '',
             'menu' => 'no',
             'shortcodes' => 'yes',
+            'cache' => 'yes',
             'url' => '',
             'type' => self::$defaultType,
         ];

@@ -1,7 +1,7 @@
 Minim
 =====
 
-**Minim** is a website creation tool that allows for easy creation of blog articles and static pages. It was built with simplicity and speed in mind. ~~Minim has on-demand caching that will render and cache a page only when it's used saving precious processing power. When the source for the page or article is changed, Minim will regenerate and recache the HTML for future use.~~
+**Minim** is a website creation tool that allows for easy creation of blog articles and static pages. It was built with simplicity and speed in mind. Minim offers on-demand caching that will render and cache a page only when it's used saving precious processing power. When the source for the page or article is changed, Minim will regenerate and recache the HTML for future use.
 
 If you download the source directly from Github, make sure to run `composer install` to get the Markdown and shortcode processor.
 
@@ -32,8 +32,18 @@ Default tags:
 - Url - URL used for a menu linked page, if omitted, the title is used with hyphens in place of spaces and all lowercase eg: `My Awesome Site` (assuming .md extension) will be `my-awesome-site.md`.
 - Type - The content type of the file, Markdown (md), HTML, or text (txt), if omitted, the configured default file type is assumed.
 - Shortcodes - Disable shortcodes when set to "no".
+- Cache - Disables caching for the page when set to "no".
 
 See the default pages and articles for examples.
+
+Caching
+-------
+
+Limitations on caching:
+
+- The cache is not invalidated when a new page is added that would change the site menu. You will need to clear the entire cache for the new page to show in the menu. This issue should be resolved soon.
+
+- Results of shortcodes will be saved in the cache. Meaning if a shortcode dynamically generates content on each page view, the first generation will be shown on subsequent requests. If you have shortcodes like this, make sure to add `cache: no` in that pages metadata. NOTE: This includes the `{{article-list}}` shortcode.
 
 Shortcodes
 ----------

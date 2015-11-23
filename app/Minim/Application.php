@@ -46,7 +46,8 @@ class Application
         $parsedHtml = $template->render($page, '../app/template.php');
 
         // Save a cached version of the page
-        if ($this->config->get('cachePages') && $pagefilename !== $this->config->get('http404page')) {
+        if ($this->config->get('cachePages')
+            && $page->getMetadata('cache') !== 'no') {
             $cache->cacheContent($pagefilename, $parsedHtml, $type, $requestedpage);
         }
 
