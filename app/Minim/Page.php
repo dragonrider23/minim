@@ -35,7 +35,7 @@ class Page
         }
 
         list(, $pageheader, $pagecontent) = explode('---', $pagestr, 3);   // split into 3 parts : above the first --- (blank), metadata, content
-        preg_match_all("~^((?!_)[\w-]+):\s*(.*)$~m", $pageheader, $matches, PREG_SET_ORDER);
+        preg_match_all("~^((?!_)[\\w-]+):\\s*(.*)$~m", $pageheader, $matches, PREG_SET_ORDER);
         foreach($matches as $match) {
             $this->metadata[mb_strtolower($match[1])] = trim($match[2]);
         }

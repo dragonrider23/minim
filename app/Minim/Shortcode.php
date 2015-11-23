@@ -1,7 +1,7 @@
 <?php
 namespace Minim;
 
-use Shortcode\Shortcode as SC;
+use Recoder\Recoder as SC;
 
 class Shortcode
 {
